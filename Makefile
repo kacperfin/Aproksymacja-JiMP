@@ -13,6 +13,12 @@ aproksymator_na_bazie.o: makespl.h points.h gaus/piv_ge_solver.h
 interpolator.o: makespl.h points.h gaus/piv_ge_solver.h
 	$(CC) -I gaus -c interpolator.c
 
+t: main.o splines.o points.o t.o gaus/libge.a
+	$(CC) -o t	main.o splines.o points.o t.o -L gaus -l ge
+
+t.o: makespl.h points.h gaus/piv_ge_solver.h
+	$(CC) -I gaus -c t.c
+
 .PHONY: clean
 
 clean:
