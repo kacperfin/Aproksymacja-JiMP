@@ -13,6 +13,14 @@
  * Funkcje bazowe: n - liczba funkcji a,b - granice przedzialu aproksymacji i
  * - numer funkcji x - wspolrzedna dla ktorej obliczana jest wartosc funkcji
  */
+double fT(double a, double b, int nb, int i, double x)
+{
+	if(nb==0) return 1;
+	if(nb==1) return x;
+	
+	return 2*x*fT(a, b, nb-1, i, x) - fT(a, b, nb-2, i, x);
+}
+
 double
 fi(double a, double b, int n, int i, double x)
 {
@@ -162,7 +170,7 @@ make_spl(points_t * pts, spline_t * spl)
 		for (i = 0; i < TESTBASE; i++) {
 			fprintf(tst, "%g", a + i * dx);
 			for (j = 0; j < nb; j++) {
-				fprintf(tst, " %g", fi  (a, b, nb, j, a + i * dx));
+				fprintf(tst, " %g", fT  (a, b, nb, j, a + i * dx));
 				fprintf(tst, " %g", dfi (a, b, nb, j, a + i * dx));
 				fprintf(tst, " %g", d2fi(a, b, nb, j, a + i * dx));
 				fprintf(tst, " %g", d3fi(a, b, nb, j, a + i * dx));
@@ -176,10 +184,10 @@ make_spl(points_t * pts, spline_t * spl)
 	for (j = 0; j < nb; j++) {
 		for (i = 0; i < nb; i++)
 			for (k = 0; k < pts->n; k++)
-				add_to_entry_matrix(eqs, j, i, fi(a, b, nb, i, x[k]) * fi(a, b, nb, j, x[k]));
+				add_to_entry_matrix(eqs, j, i, fT(a, b, nb, i, x[k]) * fT(a, b, nb, j, x[k]));
 
 		for (k = 0; k < pts->n; k++)
-			add_to_entry_matrix(eqs, j, nb, y[k] * fi(a, b, nb, j, x[k]));
+			add_to_entry_matrix(eqs, j, nb, y[k] * fT(a, b, nb, j, x[k]));
 	}
 
 #ifdef DEBUG
@@ -204,7 +212,7 @@ make_spl(points_t * pts, spline_t * spl)
 			spl->f3[i] = 0;
 			for (k = 0; k < nb; k++) {
 				double		ck = get_entry_matrix(eqs, k, nb);
-				spl->f[i]  += ck * fi  (a, b, nb, k, xx);
+				spl->f[i]  += ck * fT  (a, b, nb, k, xx);
 				spl->f1[i] += ck * dfi (a, b, nb, k, xx);
 				spl->f2[i] += ck * d2fi(a, b, nb, k, xx);
 				spl->f3[i] += ck * d3fi(a, b, nb, k, xx);
@@ -223,7 +231,7 @@ make_spl(points_t * pts, spline_t * spl)
 			double d3yi= 0;
 			double xi= a + i * dx;
 			for( k= 0; k < nb; k++ ) {
-							yi += get_entry_matrix(eqs, k, nb) * fi(a, b, nb, k, xi);
+							yi += get_entry_matrix(eqs, k, nb) * fT(a, b, nb, k, xi);
 							dyi += get_entry_matrix(eqs, k, nb) * dfi(a, b, nb, k, xi);
 							d2yi += get_entry_matrix(eqs, k, nb) * d2fi(a, b, nb, k, xi);
 							d3yi += get_entry_matrix(eqs, k, nb) * d3fi(a, b, nb, k, xi);
