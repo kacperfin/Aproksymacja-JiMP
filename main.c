@@ -1,6 +1,7 @@
 #include "points.h"
 #include "splines.h"
 #include "makespl.h"
+#include "t.h"
 
 #include <getopt.h>
 #include <stdio.h>
@@ -158,6 +159,7 @@ main (int argc, char **argv)
 
     fclose (gpf);
   }
+
 
   return 0;
 }
