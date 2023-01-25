@@ -13,133 +13,40 @@
  * Funkcje bazowe: n - liczba funkcji a,b - granice przedzialu aproksymacji i
  * - numer funkcji x - wspolrzedna dla ktorej obliczana jest wartosc funkcji
  */
-double fT(double a, double b, int nb, int i, double x)
+
+//Funkcja obl. wartosc wielomianu Czebyszewa
+double fT(int k, double x)
 {
-	if(nb==0) return 1;
-	if(nb==1) return x;
+	if(k==0) return 1;
+	if(k==1) return x;
 	
-	return 2*x*fT(a, b, nb-1, i, x) - fT(a, b, nb-2, i, x);
+	return 2*x*fT(k-1, x) - fT(k-2, x);
 }
 
-double
-fi(double a, double b, int n, int i, double x)
+//Pierwsza pochodna
+double dfT1(int k, double x)
 {
-	double		h = (b - a) / (n - 1);
-	double		h3 = h * h * h;
-	int		hi         [5] = {i - 2, i - 1, i, i + 1, i + 2};
-	double		hx      [5];
-	int		j;
+	if(k==0) return 0;
+	if(k==1) return 1;
 
-	for (j = 0; j < 5; j++)
-		hx[j] = a + h * hi[j];
-
-	if ((x < hx[0]) || (x > hx[4]))
-		return 0;
-	else if (x >= hx[0] && x <= hx[1])
-		return 1 / h3 * (x - hx[0]) * (x - hx[0]) * (x - hx[0]);
-	else if (x > hx[1] && x <= hx[2])
-		return 1 / h3 * (h3 + 3 * h * h * (x - hx[1]) + 3 * h * (x - hx[1]) * (x - hx[1]) - 3 * (x - hx[1]) * (x - hx[1]) * (x - hx[1]));
-	else if (x > hx[2] && x <= hx[3])
-		return 1 / h3 * (h3 + 3 * h * h * (hx[3] - x) + 3 * h * (hx[3] - x) * (hx[3] - x) - 3 * (hx[3] - x) * (hx[3] - x) * (hx[3] - x));
-	else			/* if (x > hx[3]) && (x <= hx[4]) */
-		return 1 / h3 * (hx[4] - x) * (hx[4] - x) * (hx[4] - x);
+	return 2*x*dfT1(k-1, x) + 2*fT(k-1, x) - dfT1(k-2, x);
 }
 
-/* Pierwsza pochodna fi */
-double
-dfi(double a, double b, int n, int i, double x)
+//Druga pochodna
+double dfT2(int k, double x)
 {
-	double		h = (b - a) / (n - 1);
-	double		h3 = h * h * h;
-	int		hi         [5] = {i - 2, i - 1, i, i + 1, i + 2};
-	double		hx      [5];
-	int		j;
+	if(k==0) return 0;
+	if(k==1) return 0;
 
-	for (j = 0; j < 5; j++)
-		hx[j] = a + h * hi[j];
-
-	if ((x < hx[0]) || (x > hx[4]))
-		return 0;
-	else if (x >= hx[0] && x <= hx[1])
-		return 3 / h3 * (x - hx[0]) * (x - hx[0]);
-	else if (x > hx[1] && x <= hx[2])
-		return 1 / h3 * (3 * h * h + 6 * h * (x - hx[1]) - 9 * (x - hx[1]) * (x - hx[1]));
-	else if (x > hx[2] && x <= hx[3])
-		return 1 / h3 * (-3 * h * h - 6 * h * (hx[3] - x) + 9 * (hx[3] - x) * (hx[3] - x));
-	else			/* if (x > hx[3]) && (x <= hx[4]) */
-		return -3 / h3 * (hx[4] - x) * (hx[4] - x);
+	return 4*dfT1(k-1, x) + 2*x*dfT2(k-1, x) - dfT2(k-2, x);
 }
 
-/* Druga pochodna fi */
-double
-d2fi(double a, double b, int n, int i, double x)
+double dfT3(int k, double x)
 {
-	double		h = (b - a) / (n - 1);
-	double		h3 = h * h * h;
-	int		hi         [5] = {i - 2, i - 1, i, i + 1, i + 2};
-	double		hx      [5];
-	int		j;
+	if(k==0) return 0;
+	if(k==1) return 0;
 
-	for (j = 0; j < 5; j++)
-		hx[j] = a + h * hi[j];
-
-	if ((x < hx[0]) || (x > hx[4]))
-		return 0;
-	else if (x >= hx[0] && x <= hx[1])
-		return 6 / h3 * (x - hx[0]);
-	else if (x > hx[1] && x <= hx[2])
-		return 1 / h3 * (6 * h - 18 * (x - hx[1]));
-	else if (x > hx[2] && x <= hx[3])
-		return 1 / h3 * (6 * h  -18 * (hx[3] - x));
-	else			/* if (x > hx[3]) && (x <= hx[4]) */
-		return 6 / h3 * (hx[4] - x);
-}
-
-/* Trzecia pochodna fi */
-double
-d3fi(double a, double b, int n, int i, double x)
-{
-	double		h = (b - a) / (n - 1);
-	double		h3 = h * h * h;
-	int		hi         [5] = {i - 2, i - 1, i, i + 1, i + 2};
-	double		hx      [5];
-	int		j;
-
-	for (j = 0; j < 5; j++)
-		hx[j] = a + h * hi[j];
-
-	if ((x < hx[0]) || (x > hx[4]))
-		return 0;
-	else if (x >= hx[0] && x <= hx[1])
-		return 6 / h3;
-	else if (x > hx[1] && x <= hx[2])
-		return -18 / h3;
-	else if (x > hx[2] && x <= hx[3])
-		return 18 / h3;
-	else			/* if (x > hx[3]) && (x <= hx[4]) */
-		return -6 / h3;
-}
-
-/* Pomocnicza f. do rysowania bazy */
-double
-xfi(double a, double b, int n, int i, FILE *out)
-{
-	double		h = (b - a) / (n - 1);
-	double		h3 = h * h * h;
-	int		hi         [5] = {i - 2, i - 1, i, i + 1, i + 2};
-	double		hx      [5];
-	int		j;
-
-	for (j = 0; j < 5; j++)
-		hx[j] = a + h * hi[j];
-
-	fprintf( out, "# nb=%d, i=%d: hi=[", n, i );
-	for( j= 0; j < 5; j++ )
-		fprintf( out, " %d", hi[j] );
-	fprintf( out, "] hx=[" );
-	for( j= 0; j < 5; j++ )
-		fprintf( out, " %g", hx[j] );
-	fprintf( out, "]\n" );
+	return 6*dfT2(k-1, x) + 2*x*dfT3(k-1, x) - dfT3(k-2, x);
 }
 
 void
@@ -160,47 +67,19 @@ make_spl(points_t * pts, spline_t * spl)
 
 	eqs = make_matrix(nb, nb + 1);
 
-#ifdef DEBUG
-#define TESTBASE 500
-	{
-		FILE           *tst = fopen("debug_base_plot.txt", "w");
-		double		dx = (b - a) / (TESTBASE - 1);
-		for( j= 0; j < nb; j++ )
-			xfi( a, b, nb, j, tst );
-		for (i = 0; i < TESTBASE; i++) {
-			fprintf(tst, "%g", a + i * dx);
-			for (j = 0; j < nb; j++) {
-				fprintf(tst, " %g", fT  (a, b, nb, j, a + i * dx));
-				fprintf(tst, " %g", dfi (a, b, nb, j, a + i * dx));
-				fprintf(tst, " %g", d2fi(a, b, nb, j, a + i * dx));
-				fprintf(tst, " %g", d3fi(a, b, nb, j, a + i * dx));
-			}
-			fprintf(tst, "\n");
-		}
-		fclose(tst);
-	}
-#endif
-
 	for (j = 0; j < nb; j++) {
 		for (i = 0; i < nb; i++)
 			for (k = 0; k < pts->n; k++)
-				add_to_entry_matrix(eqs, j, i, fT(a, b, nb, i, x[k]) * fT(a, b, nb, j, x[k]));
+				add_to_entry_matrix(eqs, j, i, fT(i, x[k]) * fT(j, x[k]));
 
 		for (k = 0; k < pts->n; k++)
-			add_to_entry_matrix(eqs, j, nb, y[k] * fT(a, b, nb, j, x[k]));
+			add_to_entry_matrix(eqs, j, nb, y[k] * fT(j, x[k]));
 	}
-
-#ifdef DEBUG
-	write_matrix(eqs, stdout);
-#endif
 
 	if (piv_ge_solver(eqs)) {
 		spl->n = 0;
 		return;
 	}
-#ifdef DEBUG
-	write_matrix(eqs, stdout);
-#endif
 
 	if (alloc_spl(spl, nb) == 0) {
 		for (i = 0; i < spl->n; i++) {
@@ -212,34 +91,12 @@ make_spl(points_t * pts, spline_t * spl)
 			spl->f3[i] = 0;
 			for (k = 0; k < nb; k++) {
 				double		ck = get_entry_matrix(eqs, k, nb);
-				spl->f[i]  += ck * fT  (a, b, nb, k, xx);
-				spl->f1[i] += ck * dfi (a, b, nb, k, xx);
-				spl->f2[i] += ck * d2fi(a, b, nb, k, xx);
-				spl->f3[i] += ck * d3fi(a, b, nb, k, xx);
+				spl->f[i]  += ck * fT  (k, xx);
+				spl->f1[i] += ck * dfT1 (k, xx);
+				spl->f2[i] += ck * dfT2(k, xx);
+				spl->f3[i] += ck * dfT3(k, xx);
 			}
 		}
 	}
-
-#ifdef DEBUG
-	{
-		FILE           *tst = fopen("debug_spline_plot.txt", "w");
-		double		dx = (b - a) / (TESTBASE - 1);
-		for (i = 0; i < TESTBASE; i++) {
-			double yi= 0;
-			double dyi= 0;
-			double d2yi= 0;
-			double d3yi= 0;
-			double xi= a + i * dx;
-			for( k= 0; k < nb; k++ ) {
-							yi += get_entry_matrix(eqs, k, nb) * fT(a, b, nb, k, xi);
-							dyi += get_entry_matrix(eqs, k, nb) * dfi(a, b, nb, k, xi);
-							d2yi += get_entry_matrix(eqs, k, nb) * d2fi(a, b, nb, k, xi);
-							d3yi += get_entry_matrix(eqs, k, nb) * d3fi(a, b, nb, k, xi);
-			}
-			fprintf(tst, "%g %g %g %g %g\n", xi, yi, dyi, d2yi, d3yi );
-		}
-		fclose(tst);
-	}
-#endif
 
 }
