@@ -21,6 +21,32 @@ double fT(double a, double b, int nb, int i, double x)
 	return 2*x*fT(a, b, nb-1, i, x) - fT(a, b, nb-2, i, x);
 }
 
+//Pierwsza pochodna
+double dfT1(double a, double b, int nb, int i, double x)
+{
+	if(nb==0) return 0;
+	if(nb==1) return 1;
+
+	return 2*x*dfT1(a, b, nb-1, i, x) + 2*fT(a, b, nb-1, i, x) - dfT1(a, b, nb-2, i, x);
+}
+
+//Druga pochodna
+double dfT2(double a, double b, int nb, int i, double x)
+{
+	if(nb==0) return 0;
+	if(nb==1) return 0;
+
+	return 4*dfT1(a, b, nb-1, i, x) + 2*x*dfT2(a, b, nb-1, i, x) - dfT2(a, b, nb-2, i, x);
+}
+
+double dfT3(double a, double b, int nb, int i, double x)
+{
+	if(nb==0) return 0;
+	if(nb==1) return 0;
+
+	return 6*dfT2(a, b, nb-1, i, x) + 2*x*dfT3(a, b, nb-1, i, x) - dfT3(a, b, nb-2, i, x);
+}
+
 double
 fi(double a, double b, int n, int i, double x)
 {
@@ -171,9 +197,9 @@ make_spl(points_t * pts, spline_t * spl)
 			fprintf(tst, "%g", a + i * dx);
 			for (j = 0; j < nb; j++) {
 				fprintf(tst, " %g", fT  (a, b, j, nb, a + i * dx));
-				fprintf(tst, " %g", dfi (a, b, nb, j, a + i * dx));
-				fprintf(tst, " %g", d2fi(a, b, nb, j, a + i * dx));
-				fprintf(tst, " %g", d3fi(a, b, nb, j, a + i * dx));
+				fprintf(tst, " %g", dfT1 (a, b, j, nb, a + i * dx));
+				fprintf(tst, " %g", dfT2(a, b, j, nb, a + i * dx));
+				fprintf(tst, " %g", dfT3(a, b, j, nb, a + i * dx));
 			}
 			fprintf(tst, "\n");
 		}
@@ -213,9 +239,9 @@ make_spl(points_t * pts, spline_t * spl)
 			for (k = 0; k < nb; k++) {
 				double		ck = get_entry_matrix(eqs, k, nb);
 				spl->f[i]  += ck * fT  (a, b, k, nb, xx);
-				spl->f1[i] += ck * dfi (a, b, nb, k, xx);
-				spl->f2[i] += ck * d2fi(a, b, nb, k, xx);
-				spl->f3[i] += ck * d3fi(a, b, nb, k, xx);
+				spl->f1[i] += ck * dfT1 (a, b, k, nb, xx);
+				spl->f2[i] += ck * dfT2(a, b, k, nb, xx);
+				spl->f3[i] += ck * dfT3(a, b, k, nb, xx);
 			}
 		}
 	}
@@ -232,9 +258,9 @@ make_spl(points_t * pts, spline_t * spl)
 			double xi= a + i * dx;
 			for( k= 0; k < nb; k++ ) {
 							yi += get_entry_matrix(eqs, k, nb) * fT(a, b, k, nb, xi);
-							dyi += get_entry_matrix(eqs, k, nb) * dfi(a, b, nb, k, xi);
-							d2yi += get_entry_matrix(eqs, k, nb) * d2fi(a, b, nb, k, xi);
-							d3yi += get_entry_matrix(eqs, k, nb) * d3fi(a, b, nb, k, xi);
+							dyi += get_entry_matrix(eqs, k, nb) * dfT1(a, b, k, nb, xi);
+							d2yi += get_entry_matrix(eqs, k, nb) * dfT2(a, b, k, nb, xi);
+							d3yi += get_entry_matrix(eqs, k, nb) * dfT3(a, b, k, nb, xi);
 			}
 			fprintf(tst, "%g %g %g %g %g\n", xi, yi, dyi, d2yi, d3yi );
 		}
